@@ -1,0 +1,1144 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>3l B4Shwat // CTF Cybersecurity Team & Research</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        deepblack: '#030303',
+                        cardblack: '#0a0a0c',
+                        crimsonred: '#b30000',
+                        brightred: '#ff1a1a',
+                        darkred: '#5c0000',
+                        offwhite: '#f0ede5',
+                        mutedgray: '#8a8a93',
+                        bordergray: '#222228'
+                    },
+                    fontFamily: {
+                        display: ['"Syne"', '"Space Grotesk"', 'sans-serif'],
+                        mono: ['"JetBrains Mono"', 'monospace'],
+                        sans: ['"Inter"', 'sans-serif']
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:ital,wght@0,300;0,400;0,700;1,400&family=Syne:wght@700;800&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+    <!-- FontAwesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+	<link rel="icon" href="img/icon.png" type="image/png">
+
+    
+    <style>
+        ::selection {
+            background: #ff1a1a;
+            color: #030303;
+        }
+        body {
+            background-color: #030303;
+            color: #f0ede5;
+            font-family: 'Inter', sans-serif;
+            overflow-x: hidden;
+            cursor: default;
+        }
+        @media (min-width: 1024px) {
+            body { cursor: none; }
+        }
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #030303;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #330000;
+            border-radius: 2px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #b30000;
+        }
+
+        /* CRT Scanlines and Grain Overlay */
+        .scanlines {
+            background: linear-gradient(
+                rgba(18, 16, 16, 0) 50%, 
+                rgba(0, 0, 0, 0.25) 50%
+            ), linear-gradient(
+                90deg,
+                rgba(255, 0, 0, 0.03),
+                rgba(0, 255, 0, 0.01),
+                rgba(0, 0, 255, 0.03)
+            );
+            background-size: 100% 3px, 6px 100%;
+            pointer-events: none;
+        }
+
+        .noise-bg {
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.04'/%3E%3C/svg%3E");
+        }
+
+        /* Custom Cursor */
+        #custom-cursor {
+            pointer-events: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 12px;
+            height: 12px;
+            background-color: #ff1a1a;
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            transition: width 0.2s, height 0.2s, background-color 0.2s;
+            z-index: 9999;
+            box-shadow: 0 0 10px #ff1a1a;
+        }
+        #custom-cursor-ring {
+            pointer-events: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 36px;
+            height: 36px;
+            border: 1px solid rgba(255, 26, 26, 0.5);
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            transition: width 0.3s, height 0.3s, border-color 0.3s;
+            z-index: 9998;
+        }
+        body.hovering #custom-cursor {
+            width: 20px;
+            height: 20px;
+            background-color: #fff;
+            box-shadow: 0 0 15px #fff;
+        }
+        body.hovering #custom-cursor-ring {
+            width: 56px;
+            height: 56px;
+            border-color: #ff1a1a;
+        }
+
+        /* Glitch Animation */
+        @keyframes glitch-anim {
+            0% { transform: translate(0) }
+            20% { transform: translate(-2px, 2px) }
+            40% { transform: translate(-2px, -2px) }
+            60% { transform: translate(2px, 2px) }
+            80% { transform: translate(2px, -2px) }
+            100% { transform: translate(0) }
+        }
+        .glitch-hover:hover {
+            animation: glitch-anim 0.2s infinite;
+        }
+
+        /* Terminal blinking cursor */
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0; }
+        }
+        .terminal-cursor {
+            animation: blink 1s infinite;
+        }
+
+        /* Card technical corner cuts & borders */
+        .tech-card {
+            position: relative;
+            background: #08080a;
+            border: 1px solid #1c1c24;
+            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .tech-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 8px;
+            height: 8px;
+            border-top: 2px solid #ff1a1a;
+            border-left: 2px solid #ff1a1a;
+            transition: all 0.3s;
+        }
+        .tech-card::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            right: 0;
+            width: 8px;
+            height: 8px;
+            border-bottom: 2px solid #ff1a1a;
+            border-right: 2px solid #ff1a1a;
+            transition: all 0.3s;
+        }
+        .tech-card:hover {
+            border-color: #7a0000;
+            transform: translateY(-4px);
+            box-shadow: 0 10px 30px -10px rgba(179, 0, 0, 0.2);
+        }
+        .tech-card:hover::before, .tech-card:hover::after {
+            width: 16px;
+            height: 16px;
+        }
+
+        /* Clip path for badge / buttons */
+        .clip-button {
+            clip-path: polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 8px 100%, 0 calc(100% - 8px));
+        }
+    </style>
+</head>
+<body class="bg-deepblack text-offwhite font-sans antialiased selection:bg-brightred selection:text-deepblack">
+
+    <!-- Custom Cursor Elements -->
+    <div id="custom-cursor" class="hidden lg:block"></div>
+    <div id="custom-cursor-ring" class="hidden lg:block"></div>
+
+    <!-- CRT Scanlines Overlay -->
+    <div class="scanlines fixed inset-0 z-50 pointer-events-none opacity-60"></div>
+    <!-- Noise Overlay -->
+    <div class="noise-bg fixed inset-0 z-40 pointer-events-none"></div>
+
+    <!-- Boot Sequence Overlay -->
+    <div id="boot-overlay" class="fixed inset-0 z-[100] bg-deepblack flex flex-col justify-center items-center font-mono text-xs sm:text-sm p-6 transition-opacity duration-700">
+        <div class="w-full max-w-lg border border-darkred bg-[#050507] p-6 rounded shadow-2xl relative">
+            <div class="absolute top-2 right-2 text-mutedgray text-[10px]">KERNEL v5.15-CTF</div>
+            <div class="text-brightred font-bold mb-3 text-base flex items-center gap-2">
+                <i class="fa-solid fa-terminal"></i> INITIALIZING 3l B4SHWAT KERNEL...
+            </div>
+            <div id="boot-logs" class="space-y-1 text-mutedgray mb-4 font-mono">
+                <div>[+] Loading core architecture... [OK]</div>
+                <div>[+] Decrypting red fez module... [OK]</div>
+                <div>[+] Calibrating zero-day exploits... [OK]</div>
+            </div>
+            <div class="w-full bg-bordergray h-1.5 overflow-hidden rounded">
+                <div id="boot-progress" class="bg-brightred h-full w-0 transition-all duration-350"></div>
+            </div>
+            <div class="mt-4 text-right text-[11px] text-offwhite opacity-70 animate-pulse">PRESS ENTER OR CLICK TO BYPASS</div>
+        </div>
+    </div>
+
+    <!-- Navigation Bar -->
+    <header id="navbar" class="fixed top-0 left-0 right-0 z-40 bg-deepblack/80 backdrop-blur-md border-b border-bordergray transition-all duration-300">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
+            <!-- Logo & Brand -->
+            <a href="#home" class="flex items-center gap-3 group">
+                <div class="relative w-10 h-10 overflow-hidden border border-darkred bg-cardblack flex items-center justify-center transition-transform group-hover:scale-105" id="logo-container" title="Click for glitch payload">
+                    <!-- Embedded SVG recreation of the Fez logo -->
+                    <svg viewBox="0 0 100 100" class="w-full h-full object-contain p-1">
+                        <path d="M30 45 L50 35 L70 45 L70 65 L30 65 Z" fill="#990000" stroke="#ff1a1a" stroke-width="1.5"/>
+                        <path d="M50 35 L50 20 L65 25 L60 38" fill="none" stroke="#f0ede5" stroke-width="2"/>
+                        <circle cx="62" cy="27" r="3" fill="#ff1a1a"/>
+                        <path d="M20 70 L80 70 L85 85 L15 85 Z" fill="#111" stroke="#ff1a1a" stroke-width="1"/>
+                        <text x="50" y="80" fill="#f0ede5" font-size="12" font-family="monospace" font-weight="bold" text-anchor="middle">3lB4</text>
+                    </svg>
+                </div>
+                <div class="flex flex-col">
+                    <span class="font-display font-bold text-lg tracking-wider text-offwhite group-hover:text-brightred transition-colors">3l B4Shwat</span>
+                    <span class="font-mono text-[10px] text-mutedgray tracking-widest">CTF TEAM</span>
+                </div>
+            </a>
+
+            <!-- Desktop Nav Links -->
+            <nav class="hidden md:flex items-center space-x-8 font-mono text-xs uppercase tracking-widest">
+                <a href="#home" class="nav-link text-offwhite hover:text-brightred transition-colors py-2 relative">Home</a>
+                <a href="#team" class="nav-link text-mutedgray hover:text-brightred transition-colors py-2 relative">Team</a>
+                <a href="#writeups" class="nav-link text-mutedgray hover:text-brightred transition-colors py-2 relative">Writeups</a>
+                <a href="#ctfs" class="nav-link text-mutedgray hover:text-brightred transition-colors py-2 relative">CTFs</a>
+                <a href="#about" class="nav-link text-mutedgray hover:text-brightred transition-colors py-2 relative">About</a>
+            </nav>
+
+            <!-- Social Icons & Mobile Toggle -->
+            <div class="flex items-center space-x-4">
+                <div class="hidden sm:flex items-center space-x-3 text-mutedgray text-sm">
+                    <a href="https://github.com/3l-B4shwat" target="_blank" rel="noopener" class="hover:text-brightred transition-colors p-2" title="GitHub"><i class="fa-brands fa-github"></i></a>
+                    <a href="https://ctftime.org/team/447618" target="_blank" rel="noopener" class="hover:text-brightred transition-colors p-2" title="CTFtime"><i class="fa-solid fa-flag"></i></a>
+                    <a href="https://discord.gg/GUUfdSVPn" target="_blank" rel="noopener" class="hover:text-brightred transition-colors p-2" title="Discord"><i class="fa-brands fa-discord"></i></a>
+                    <a href="https://x.com/3lB4Shwat" target="_blank" rel="noopener" class="hover:text-brightred transition-colors p-2" title="X / Twitter"><i class="fa-brands fa-x-twitter"></i></a>
+                </div>
+                <!-- Mobile Menu Button -->
+                <button id="mobile-menu-btn" class="md:hidden text-offwhite hover:text-brightred p-2 focus:outline-none" aria-label="Toggle Menu">
+                    <i class="fa-solid fa-bars text-xl"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Mobile Drawer Menu -->
+        <div id="mobile-menu" class="hidden md:hidden bg-deepblack border-b border-bordergray px-6 py-6 font-mono text-sm space-y-4">
+            <a href="#home" class="mobile-link block text-offwhite hover:text-brightred py-1">/home</a>
+            <a href="#team" class="mobile-link block text-mutedgray hover:text-brightred py-1">/team</a>
+            <a href="#writeups" class="mobile-link block text-mutedgray hover:text-brightred py-1">/writeups</a>
+            <a href="#ctfs" class="mobile-link block text-mutedgray hover:text-brightred py-1">/ctfs</a>
+            <a href="#about" class="mobile-link block text-mutedgray hover:text-brightred py-1">/about</a>
+            <div class="pt-4 flex items-center space-x-6 text-mutedgray border-t border-bordergray">
+                <a href="https://github.com" target="_blank" class="hover:text-brightred"><i class="fa-brands fa-github text-lg"></i></a>
+                <a href="https://ctftime.org" target="_blank" class="hover:text-brightred"><i class="fa-solid fa-flag text-lg"></i></a>
+                <a href="https://discord.com" target="_blank" class="hover:text-brightred"><i class="fa-brands fa-discord text-lg"></i></a>
+                <a href="https://twitter.com" target="_blank" class="hover:text-brightred"><i class="fa-brands fa-x-twitter text-lg"></i></a>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content Wrapper -->
+    <main class="relative z-10 pt-20">
+
+        <!-- 1. HERO / HOME SECTION -->
+        <section id="home" class="min-h-[90vh] flex flex-col justify-center items-center relative px-4 sm:px-6 lg:px-8 py-20 overflow-hidden">
+            <!-- Background grid decorative lines -->
+            <div class="absolute inset-0 bg-[linear-gradient(to_right,#111_1px,transparent_1px),linear-gradient(to_bottom,#111_1px,transparent_1px)] bg-[size:4rem_4rem] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_50%,#000_70%,transparent_100%)] opacity-30"></div>
+
+            <div class="max-w-5xl mx-auto text-center relative z-10">
+                <!-- Terminal Microtext prompt -->
+                <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded bg-cardblack border border-darkred font-mono text-xs text-mutedgray mb-6 shadow-lg">
+                    <span class="text-brightred">$</span>
+                    <span>whoami</span>
+                    <span class="text-offwhite font-bold">3l B4Shwat</span>
+                    <span class="w-2 h-4 bg-brightred terminal-cursor inline-block ml-1"></span>
+                </div>
+
+                <!-- Main Title -->
+                <h1 class="font-display font-extrabold text-5xl sm:text-7xl md:text-8xl tracking-tight text-offwhite mb-6 uppercase glitch-hover drop-shadow-[0_10px_20px_rgba(179,0,0,0.3)]">
+                    3l <span class="text-brightred">B4Shwat</span>
+                </h1>
+
+                <!-- Technical Subtitle -->
+                <div class="font-mono text-sm sm:text-base md:text-lg text-mutedgray tracking-widest mb-10 uppercase">
+                    CTF TEAM <span class="text-brightred mx-2">//</span> SECURITY RESEARCH 
+                </div>
+
+                <!-- Quick CTF Stats bar -->
+                <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 max-w-3xl mx-auto mb-12">
+                    <div class="tech-card p-4 rounded text-center">
+                        <div class="font-mono text-2xl sm:text-3xl font-bold text-brightred" id="stat-ctfs">48</div>
+                        <div class="text-[11px] font-mono text-mutedgray uppercase tracking-wider mt-1">CTFs Played</div>
+                    </div>
+                    <div class="tech-card p-4 rounded text-center">
+                        <div class="font-mono text-2xl sm:text-3xl font-bold text-offwhite" id="stat-writeups">124</div>
+                        <div class="text-[11px] font-mono text-mutedgray uppercase tracking-wider mt-1">Writeups</div>
+                    </div>
+                    <div class="tech-card p-4 rounded text-center">
+                        <div class="font-mono text-2xl sm:text-3xl font-bold text-brightred" id="stat-solved">530+</div>
+                        <div class="text-[11px] font-mono text-mutedgray uppercase tracking-wider mt-1">Flags Captured</div>
+                    </div>
+                    <div class="tech-card p-4 rounded text-center">
+                        <div class="font-mono text-2xl sm:text-3xl font-bold text-offwhite" id="stat-rank">#1</div>
+                        <div class="text-[11px] font-mono text-mutedgray uppercase tracking-wider mt-1">Regional Rank</div>
+                    </div>
+                </div>
+
+                <!-- Call to Action Buttons -->
+                <div class="flex flex-col sm:flex-row items-center justify-center gap-4 font-mono text-xs uppercase tracking-wider">
+                    <a href="#writeups" class="w-full sm:w-auto px-8 py-4 bg-brightred text-deepblack font-bold hover:bg-offwhite transition-colors clip-button text-center flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-book-open"><span>  Explore Writeups</span></i>
+                    </a>
+                    <a href="#team" class="w-full sm:w-auto px-8 py-4 bg-cardblack border border-bordergray text-offwhite hover:border-brightred transition-colors clip-button text-center flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-users"><span>   Meet The Roster</span></i>
+                    </a>
+                </div>
+            </div>
+
+            <!-- Scroll indicator -->
+            <div class="absolute bottom-6 left-1/2 transform -translate-x-1/2 flex flex-col items-center text-mutedgray font-mono text-[10px] tracking-widest animate-bounce">
+                <span>SCROLL DOWN</span>
+                <i class="fa-solid fa-chevron-down mt-1 text-brightred"></i>
+            </div>
+        </section>
+
+        <!-- 3. TEAM SECTION -->
+        <section id="team" class="py-24 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto border-t border-bordergray">
+            <div class="flex flex-col md:flex-row md:items-end justify-between mb-16">
+                <div>
+                    <div class="font-mono text-xs text-brightred tracking-widest uppercase mb-2">// 01. ELITE OPERATIVES</div>
+                    <h2 class="font-display font-extrabold text-3xl sm:text-5xl uppercase tracking-tight">The Roster</h2>
+                </div>
+                <p class="text-mutedgray max-w-md font-mono text-xs mt-4 md:mt-0">
+                    Security researchers, reverse engineers, exploit developers, and protocol breakers operating from the shadows.
+                </p>
+            </div>
+
+            <!-- Team Grid -->
+            <div id="team-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                <!-- Dynamically populated via JS -->
+            </div>
+        </section>
+
+        <!-- 4. WRITEUPS & RESEARCH SECTION -->
+        <section id="writeups" class="py-24 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto border-t border-bordergray">
+            <div class="flex flex-col md:flex-row md:items-end justify-between mb-12">
+                <div>
+                    <div class="font-mono text-xs text-brightred tracking-widest uppercase mb-2">// 02. KNOWLEDGE BASE</div>
+                    <h2 class="font-display font-extrabold text-3xl sm:text-5xl uppercase tracking-tight">Research & Writeups</h2>
+                </div>
+                <p class="text-mutedgray max-w-md font-mono text-xs mt-4 md:mt-0">
+                    Detailed deep dives, exploit paths, payloads, and post-mortems from top international CTFs.
+                </p>
+            </div>
+
+            <!-- Search and Filters Bar -->
+            <div class="bg-cardblack border border-bordergray p-4 sm:p-6 rounded mb-8 space-y-4">
+                <div class="flex flex-col lg:flex-row gap-4 items-center justify-between">
+                    <!-- Search Input -->
+                    <div class="relative w-full lg:w-96">
+                        <span class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-mutedgray">
+                            <i class="fa-solid fa-magnifying-glass"></i>
+                        </span>
+                        <input type="text" id="writeup-search" placeholder="search writeups by title, ctf, or keyword..." class="w-full bg-deepblack border border-bordergray rounded pl-10 pr-4 py-2.5 text-sm text-offwhite placeholder:text-mutedgray focus:outline-none focus:border-brightred font-mono">
+                    </div>
+
+                    <!-- Sorting selector -->
+                    <div class="flex items-center gap-3 w-full lg:w-auto justify-end">
+                        <span class="font-mono text-xs text-mutedgray uppercase">Sort:</span>
+                        <select id="writeup-sort" class="bg-deepblack border border-bordergray rounded px-3 py-2 text-xs font-mono text-offwhite focus:outline-none focus:border-brightred">
+                            <option value="latest">Latest First</option>
+                            <option value="oldest">Oldest First</option>
+                            <option value="difficulty">Difficulty</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Category Pills Filter -->
+                <div id="category-filters" class="flex flex-wrap gap-2 pt-2 border-t border-bordergray font-mono text-xs">
+                    <button data-category="ALL" class="cat-btn px-3 py-1.5 rounded bg-brightred text-deepblack font-bold transition-all">ALL</button>
+                    <button data-category="WEB" class="cat-btn px-3 py-1.5 rounded bg-deepblack border border-bordergray text-mutedgray hover:text-offhover transition-all">WEB</button>
+                    <button data-category="PWN" class="cat-btn px-3 py-1.5 rounded bg-deepblack border border-bordergray text-mutedgray hover:text-offhover transition-all">PWN</button>
+                    <button data-category="REV" class="cat-btn px-3 py-1.5 rounded bg-deepblack border border-bordergray text-mutedgray hover:text-offhover transition-all">REV</button>
+                    <button data-category="CRYPTO" class="cat-btn px-3 py-1.5 rounded bg-deepblack border border-bordergray text-mutedgray hover:text-offhover transition-all">CRYPTO</button>
+                    <button data-category="FORENSICS" class="cat-btn px-3 py-1.5 rounded bg-deepblack border border-bordergray text-mutedgray hover:text-offhover transition-all">FORENSICS</button>
+                    <button data-category="OSINT" class="cat-btn px-3 py-1.5 rounded bg-deepblack border border-bordergray text-mutedgray hover:text-offhover transition-all">OSINT</button>
+                    <button data-category="MISC" class="cat-btn px-3 py-1.5 rounded bg-deepblack border border-bordergray text-mutedgray hover:text-offhover transition-all">MISC</button>
+                </div>
+            </div>
+
+            <!-- Writeups Grid -->
+            <div id="writeups-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <!-- Dynamically populated via JS -->
+            </div>
+        </section>
+
+        <!-- 5. CTF / ACHIEVEMENTS SECTION -->
+        <section id="ctfs" class="py-24 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto border-t border-bordergray">
+            <div class="flex flex-col md:flex-row md:items-end justify-between mb-16">
+                <div>
+                    <div class="font-mono text-xs text-brightred tracking-widest uppercase mb-2">// 03. HALL OF FLAGS</div>
+                    <h2 class="font-display font-extrabold text-3xl sm:text-5xl uppercase tracking-tight">CTF Achievements</h2>
+                </div>
+                <p class="text-mutedgray max-w-md font-mono text-xs mt-4 md:mt-0">
+                    Our competitive history across global platforms and invitational tournaments.
+                </p>
+            </div>
+
+            <!-- Timeline Container -->
+            <div id="ctf-timeline" class="space-y-6">
+                <!-- Dynamically populated via JS -->
+            </div>
+        </section>
+
+        <!-- 7. ABOUT SECTION -->
+        <section id="about" class="py-24 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto border-t border-bordergray">
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+                <div>
+                    <div class="font-mono text-xs text-brightred tracking-widest uppercase mb-2">// 04. MANIFESTO</div>
+                    <h2 class="font-display font-extrabold text-3xl sm:text-5xl uppercase tracking-tight mb-6">Who is 3l B4Shwat?</h2>
+                    <p class="text-mutedgray text-base leading-relaxed mb-6 font-sans">
+                        We are an elite independent CTF team and offensive security research collective born from late nights, curiosity, and an obsession with understanding how digital systems break. Named after the historic Ottoman fez symbol worn with modern technological rebellion, 3l B4Shwat bridges classical computer science principles with cutting-edge exploit engineering.
+                    </p>
+                    <p class="text-mutedgray text-base leading-relaxed mb-8 font-sans">
+                        Whether it's unearthing 0-days in complex web stacks, reversing heavily obfuscated binaries, or cracking cryptographic primitives under strict time pressure, our focus is uncompromising: precision, mastery, and transparent sharing of knowledge.
+                    </p>
+
+                    <!-- Team Philosophy bullets -->
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 font-mono text-xs">
+                        <div class="tech-card p-4 rounded">
+                            <div class="text-brightred font-bold text-sm mb-1">01. BREAK THINGS</div>
+                            <div class="text-mutedgray">Dismantle sandboxes, bypass mitigations, and locate the boundary condition.</div>
+                        </div>
+                        <div class="tech-card p-4 rounded">
+                            <div class="text-brightred font-bold text-sm mb-1">02. UNDERSTAND WHY</div>
+                            <div class="text-mutedgray">Never settle for black-box execution; master the root cause vulnerability.</div>
+                        </div>
+                        <div class="tech-card p-4 rounded">
+                            <div class="text-brightred font-bold text-sm mb-1">03. WRITE IT DOWN</div>
+                            <div class="text-mutedgray">Document the payload, construct clean writeups, and educate the community.</div>
+                        </div>
+                        <div class="tech-card p-4 rounded">
+                            <div class="text-brightred font-bold text-sm mb-1">04. REPEAT</div>
+                            <div class="text-mutedgray">The leaderboard never sleeps, and the kernel always has another bug.</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Technical Specialization Radar/Bars -->
+                <div class="tech-card p-6 sm:p-8 rounded bg-cardblack">
+                    <div class="flex items-center justify-between mb-6 pb-4 border-b border-bordergray font-mono text-xs">
+                        <span class="text-offwhite font-bold"><i class="fa-solid fa-microchip text-brightred mr-2"></i>SKILLS & SPECIALIZATIONS</span>
+                        <span class="text-mutedgray">ACTIVE MATRIX</span>
+                    </div>
+
+                    <div class="space-y-5 font-mono text-xs">
+                        <div>
+                            <div class="flex justify-between mb-1">
+                                <span class="text-offwhite">WEB EXPLOITATION (XS-Leak, Desync, SSTI)</span>
+                                <span class="text-brightred">98%</span>
+                            </div>
+                            <div class="w-full bg-deepblack h-2 rounded overflow-hidden border border-bordergray">
+                                <div class="bg-brightred h-full w-[98%]"></div>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="flex justify-between mb-1">
+                                <span class="text-offwhite">BINARY PWN (Heap, ROP, Kernel)</span>
+                                <span class="text-brightred">95%</span>
+                            </div>
+                            <div class="w-full bg-deepblack h-2 rounded overflow-hidden border border-bordergray">
+                                <div class="bg-brightred h-full w-[95%]"></div>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="flex justify-between mb-1">
+                                <span class="text-offwhite">REVERSE ENGINEERING (IDA/Ghidra/ARM)</span>
+                                <span class="text-brightred">90%</span>
+                            </div>
+                            <div class="w-full bg-deepblack h-2 rounded overflow-hidden border border-bordergray">
+                                <div class="bg-brightred h-full w-[90%]"></div>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="flex justify-between mb-1">
+                                <span class="text-offwhite">CRYPTO & LATTICES</span>
+                                <span class="text-brightred">85%</span>
+                            </div>
+                            <div class="w-full bg-deepblack h-2 rounded overflow-hidden border border-bordergray">
+                                <div class="bg-brightred h-full w-[85%]"></div>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="flex justify-between mb-1">
+                                <span class="text-offwhite">DIGITAL FORENSICS & OSINT</span>
+                                <span class="text-brightred">88%</span>
+                            </div>
+                            <div class="w-full bg-deepblack h-2 rounded overflow-hidden border border-bordergray">
+                                <div class="bg-brightred h-full w-[88%]"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- 10. FOOTER -->
+    <footer class="border-t border-bordergray bg-cardblack py-16 px-4 sm:px-6 lg:px-8 relative z-10 font-mono">
+        <div class="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-8">
+            <div class="flex items-center space-x-4">
+                <div class="w-8 h-8 bg-deepblack border border-darkred flex items-center justify-center">
+                    <span class="text-brightred font-bold text-xs">3L</span>
+                </div>
+                <div>
+                    <div class="text-offwhite font-bold text-sm">3l B4Shwat CTF</div>
+                    <div class="text-[11px] text-mutedgray">"made between flags and sleep deprivation."</div>
+                </div>
+            </div>
+
+            <!-- Social Links -->
+            <div class="flex items-center space-x-6 text-mutedgray text-sm">
+                <a href="https://github.com/3l-B4shwat" target="_blank" class="hover:text-brightred transition-colors"><i class="fa-brands fa-github mr-1"></i> GitHub</a>
+                <a href="https://ctftime.org/team/447618" target="_blank" class="hover:text-brightred transition-colors"><i class="fa-solid fa-flag mr-1"></i> CTFtime</a>
+                <a href="https://discord.gg/GUUfdSVPn" target="_blank" class="hover:text-brightred transition-colors"><i class="fa-brands fa-discord mr-1"></i> Discord</a>
+                <a href="https://x.com/3lB4Shwat" target="_blank" class="hover:text-brightred transition-colors"><i class="fa-brands fa-x-twitter mr-1"></i> X</a>
+            </div>
+
+            <div class="text-xs text-mutedgray text-center md:text-right">
+                <div>&copy; 2026 3l B4Shwat. All rights reserved.</div>
+                <div class="text-[10px] opacity-60 mt-1">SECURE ENCLAVE</div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- WRITEUP MODAL VIEW (HIDDEN BY DEFAULT) -->
+    <div id="writeup-modal" class="fixed inset-0 z-50 bg-deepblack/90 backdrop-blur-md hidden overflow-y-auto px-4 py-12">
+        <div class="max-w-4xl mx-auto bg-cardblack border border-bordergray rounded-lg shadow-2xl relative p-6 sm:p-10">
+            <!-- Close Button -->
+            <button id="close-modal" class="absolute top-6 right-6 text-mutedgray hover:text-brightred text-xl p-2 transition-colors">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+
+            <div id="modal-content" class="font-sans">
+                <!-- Dynamically injected writeup detail -->
+            </div>
+        </div>
+    </div>
+
+    <!-- CUSTOM 404 VIEW (HIDDEN BY DEFAULT) -->
+    <div id="view-404" class="fixed inset-0 z-50 bg-deepblack flex flex-col items-center justify-center p-6 text-center hidden">
+        <div class="font-mono text-brightred text-xl sm:text-2xl mb-2">ERROR 404</div>
+        <h1 class="font-display font-extrabold text-5xl sm:text-7xl mb-4 text-offwhite">FLAG NOT FOUND</h1>
+        <p class="font-mono text-mutedgray max-w-md text-sm mb-8">
+            The requested resource escaped the sandbox or was pruned by the garbage collector.
+        </p>
+        <button onclick="close404()" class="px-6 py-3 bg-brightred text-deepblack font-mono font-bold text-xs uppercase tracking-wider clip-button hover:bg-offwhite transition-colors">
+            Return to Sandbox
+        </button>
+    </div>
+
+    <!-- JAVASCRIPT LOGIC -->
+    <script>
+        // --- DATA ARRAYS ---
+        const teamMembers = [
+            {
+                alias: "DarkHEX",
+                realName: "Mohamed Ahmed Hemada.",
+                role: "Reverse Engineering",
+                secondary: "REVERSE / HEAP",
+                tags: ["PWN", "REV", "DFIR", "CYRPTO", "Mobile", "MALWARE", "FIRMWARE", "HARDWARE"],
+                github: "https://github.com/MohamedAhamedHemada",
+                x: "https://x.com/MHemada76393",
+                ctftime: "https://mohamed-hemada.netlify.app/",
+                avatarColor: "#b30000"
+            },
+            {
+                alias: "Glich",
+                realName: "Mohamed Raoof.",
+                role: "DFIR",
+                secondary: "DFIR",
+                tags: ["DFIR"],
+                github: "https://github.com",
+                x: "https://x.com",
+                ctftime: "https://ctftime.org",
+                avatarColor: "#5c0000"
+            },
+            {
+                alias: "Atlass",
+                realName: "Ahmed Yasser.",
+                role: "WEB & OSINT",
+                secondary: "OSINT",
+                tags: ["WEB", "OSNIT"],
+                github: "https://github.com",
+                x: "https://x.com",
+                ctftime: "https://ctftime.org",
+                avatarColor: "#800020"
+            },
+            {
+                alias: "Xpl8",
+                realName: "Mahmoud Ehab.",
+                role: "WEB",
+                secondary: "WEB / OSINT",
+                tags: ["WEB", "OSNIT"],
+                github: "https://github.com",
+                x: "https://x.com",
+                ctftime: "https://ctftime.org",
+                avatarColor: "#990000"
+            },
+            {
+                alias: "MRxAlc0h0lic",
+                realName: "Yousef Ahmed.",
+                role: "REVERSE & OSINT",
+                secondary: "PREVERSE",
+                tags: ["REV", "OSINT"],
+                github: "https://github.com/MRxAlc0h0lic",
+                x: "https://x.com/youssifvw",
+                ctftime: "https://ctftime.org/user/267217",
+                avatarColor: "#400000"
+            },
+            {
+                alias: "R0b3n.H00d",
+                realName: "Hamza Ibrahim.",
+                role: "OSINT & Misc",
+                secondary: "OSINT",
+                tags: ["MISC", "OSNIT"],
+                github: "https://github.com",
+                x: "https://x.com",
+                ctftime: "https://ctftime.org",
+                avatarColor: "#660000"
+            },
+			{
+                alias: "0xAdham.exe",
+                realName: "Adham Mohamed.",
+                role: "WEB & Reverse",
+                secondary: "WEB / REV",
+                tags: ["WEB", "REV"],
+                github: "https://github.com/0xadham1",
+                x: "https://x.com",
+                ctftime: "https://0xadham1.github.io/",
+                avatarColor: "#660000"
+            }
+        ];
+
+        const writeups = [
+            {
+                id: "sekai-http-desync",
+                ctfName: "SEKAICTF 2026",
+                challengeName: "HTTP Desync & XS-Leak",
+                category: "WEB",
+                difficulty: "Hard",
+                author: "@f ez_master",
+                date: "29 JUN 2026",
+                tags: ["HTTP", "XS-Leak", "Web Security"],
+                tldr: "Bypassing frontend proxy limits using CL.TE desynchronization combined with a cross-site timing leak to exfiltrate session tokens.",
+                description: "The target application sat behind an Nginx reverse proxy forwarding requests to a custom Go backend parser that handled Transfer-Encoding headers loosely.",
+                recon: "Using curl and custom socket scripts, we noticed discrepancies in how malformed HTTP/1.1 pipelined requests were processed between frontend and backend.",
+                analysis: "The backend accepted both Content-Length and Transfer-Encoding headers simultaneously without rejecting the request or sanitizing precedence.",
+                exploitation: "Crafted a custom TCP payload injecting a smuggled second request that targeted the admin diagnostic endpoint.",
+                payload: `POST / HTTP/1.1\r\nHost: target.ctf\r\nContent-Length: 46\r\nTransfer-Encoding: chunked\r\n\r\n0\r\n\r\nGET /admin/flag HTTP/1.1\r\nHost: localhost`,
+                solution: "Extracted the administrative session cookie via timing side-channels and retrieved the flag.",
+                flag: "SEKAI{h1tt1ng_th3_d3sync_m4st3r_9981}"
+            },
+            {
+                id: "defcon-kernel-rop",
+                ctfName: "DEF CON QUALS 2026",
+                challengeName: "FezKernel UAF",
+                category: "PWN",
+                difficulty: "Insane",
+                author: "@b0sh",
+                date: "18 MAY 2026",
+                tags: ["Kernel", "UAF", "ROP"],
+                tldr: "Exploiting a Use-After-Free vulnerability in a custom Linux kernel module managing fez synchronization states to achieve local privilege escalation.",
+                description: "A proprietary character driver loaded in kernel space implemented custom IOCTL commands with improper locking primitives.",
+                recon: "Examined the decompiled driver module using Ghidra, identifying a dangling pointer in the struct fez_session cleanup handler.",
+                analysis: "When a session was closed while worker threads were active, the heap slot remained referenced in kmalloc-512 cache.",
+                exploitation: "Sprayed the slab allocator with user-space payload buffers containing fake function pointers pointing to kernel gadgets.",
+                payload: `#include <fcntl.h>\n#include <sys/ioctl.h>\n\nint main() {\n    int fd = open("/dev/fez_driver", O_RDWR);\n    ioctl(fd, 0x1337, 0xdeadbeef);\n    // Trigger kernel ROP chain\n}`,
+                solution: "Disabled SMEP/SMAP via custom control register pivoting and spawned a root shell.",
+                flag: "FLAG{k3rn3l_r0p_ch41n_su3c3ss_007}"
+            },
+            {
+                id: "google-vm-escape",
+                ctfName: "GOOGLE CTF 2026",
+                challengeName: "Obfuscated FezVM",
+                category: "REV",
+                difficulty: "Medium",
+                author: "@gh0st_byte",
+                date: "12 APR 2026",
+                tags: ["VM", "Deobfuscation", "ARM"],
+                tldr: "Reverse engineering a custom stack-based virtual machine executing heavily mutated bytecode with XOR-encrypted instruction tables.",
+                description: "The binary accepted a serialized VM bytecode file and verified user input against a hardcoded flag hash function.",
+                recon: "Static analysis revealed a custom instruction set architecture (ISA) with 64 dynamic opcode handlers.",
+                analysis: "Wrote an IDAPython script to dynamically dump decrypted instruction handlers during runtime execution.",
+                exploitation: "Parsed the instruction trace using Z3 theorem solver to instantly compute the valid input sequence.",
+                payload: `python3 solver.py --bytecode vm.bin --target hash_check`,
+                solution: "Reconstructed the symbolic execution constraints and verified the correct flag string.",
+                flag: "GCTF{vm_d30bfusc4ti0n_is_fun_2026}"
+            },
+            {
+                id: "lactf-lattice-crypto",
+                ctfName: "LACTF 2026",
+                challengeName: "FezLattice NTRU",
+                category: "CRYPTO",
+                difficulty: "Hard",
+                author: "@n0_patch",
+                date: "04 MAR 2026",
+                tags: ["Lattice", "NTRU", "LLL"],
+                tldr: "Solving a high-dimensional lattice reduction problem using LLL algorithm on compromised NTRU public keys.",
+                description: "The challenge implemented a simplified NTRU cryptosystem over polynomial rings with small weight coefficients.",
+                recon: "Analyzed the public key generation script and found that the private polynomials were generated with insufficient Hamming weight randomness.",
+                analysis: "Constructed the basis matrix for the lattice formed by the public key coefficients.",
+                exploitation: "Applied SageMath LLL reduction algorithm to recover the hidden private key polynomials.",
+                payload: `load("solve.sage")\nM = create_lattice_matrix(pub_key)\nreduced = M.LLL()\nflag = decrypt(reduced, ciphertext)`,
+                solution: "Extracted the original cleartext flag from the decrypted polynomial plaintext.",
+                flag: "lactf{l1tt1e_l4tt1c3_n0_pr0bl3m_882}"
+            },
+            {
+                id: "corctf-memory-dump",
+                ctfName: "CORCTF 2026",
+                challengeName: "Hidden Fez Forensics",
+                category: "FORENSICS",
+                difficulty: "Medium",
+                author: "@trace_root",
+                date: "15 FEB 2026",
+                tags: ["Volatility", "Memory", "Steganography"],
+                tldr: "Extracting injected shellcode from a volatile RAM capture using Volatility3 and carving hidden artifacts.",
+                description: "A compromised Linux VM memory dump containing suspicious hidden background processes.",
+                recon: "Ran volatility pslist and netstat plugins to spot anomalous process trees.",
+                analysis: "Dumped memory sections of the PID corresponding to an unlinked ELF binary in /dev/shm.",
+                exploitation: "Carved the raw binary payload and analyzed embedded steganographic key fragments.",
+                payload: `vol -f memdump.raw linux.pslist.PsList\nvol -f memdump.raw linux.dump_map --pid 1337`,
+                solution: "Assembled the fragmented memory strings into the correct flag format.",
+                flag: "corctf{m3m0ry_f0r3ns1cs_r0cks_192}"
+            },
+            {
+                id: "asis-osint-target",
+                ctfName: "ASIS CTF 2026",
+                challengeName: "The Fez Coordinates",
+                category: "OSINT",
+                difficulty: "Easy",
+                author: "@trace_root",
+                date: "20 JAN 2026",
+                tags: ["OSINT", "Geolocate", "Metadata"],
+                tldr: "Geolocating an obscure historical landmark in North Africa using EXIF metadata and shadow trajectory calculations.",
+                description: "Provided with a single raw photograph of a vintage fez hat against a blurry architectural backdrop.",
+                recon: "Extracted EXIF thumbnail data and analyzed sun angle shadows using peak altitude formulas.",
+                analysis: "Cross-referenced architectural ironwork patterns with regional historical archives.",
+                exploitation: "Pinpointed the exact latitude and longitude of the rooftop terrace.",
+                payload: `GPS Latitude: 30.0444° N\nGPS Longitude: 31.2357° E`,
+                solution: "Formatted the resulting coordinates into the expected CTF flag string.",
+                flag: "ASIS{c4ir0_f3z_r00ft0p_g30l0c4t3d}"
+            }
+        ];
+
+        const ctfHistory = [
+            {
+                year: "2026",
+                ctfs: [
+                    { name: "SEKAICTF 2026", rank: "#4", points: "4,820", solved: "18/22", date: "June 2026" },
+                    { name: "DEF CON Quals 2026", rank: "#12", points: "6,910", solved: "14/19", date: "May 2026" },
+                    { name: "Google CTF 2026", rank: "#7", points: "3,450", solved: "12/15", date: "April 2026" },
+                    { name: "LACTF 2026", rank: "#2", points: "5,120", solved: "24/25", date: "March 2026" }
+                ]
+            },
+            {
+                year: "2025",
+                ctfs: [
+                    { name: "PlaidCTF 2025", rank: "#5", points: "7,200", solved: "16/20", date: "November 2025" },
+                    { name: "DEADFACE CTF 2025", rank: "#1", points: "8,900", solved: "All", date: "October 2025" },
+                    { name: "ASIS CTF Finals 2025", rank: "#3", points: "4,300", solved: "11/14", date: "August 2025" }
+                ]
+            }
+        ];
+
+        // --- BOOT SEQUENCE LOGIC ---
+        window.addEventListener('DOMContentLoaded', () => {
+            const bootOverlay = document.getElementById('boot-overlay');
+            const bootProgress = document.getElementById('boot-progress');
+            const bootLogs = document.getElementById('boot-logs');
+
+            let progress = 0;
+            const interval = setInterval(() => {
+                progress += 25;
+                bootProgress.style.width = progress + '%';
+                if(progress === 50) {
+                    bootLogs.innerHTML += `<div>[+] Mounting writeups filesystem... [OK]</div>`;
+                } else if(progress === 75) {
+                    bootLogs.innerHTML += `<div>[+] Establishing secure WebSocket... [OK]</div>`;
+                } else if(progress >= 100) {
+                    clearInterval(interval);
+                    setTimeout(() => {
+                        bootOverlay.style.opacity = '0';
+                        setTimeout(() => bootOverlay.remove(), 700);
+                    }, 400);
+                }
+            }, 180);
+
+            bootOverlay.addEventListener('click', () => {
+                clearInterval(interval);
+                bootOverlay.style.opacity = '0';
+                setTimeout(() => bootOverlay.remove(), 500);
+            });
+
+            document.addEventListener('keydown', (e) => {
+                if(e.key === 'Enter') {
+                    bootOverlay.style.opacity = '0';
+                    setTimeout(() => bootOverlay.remove(), 500);
+                }
+            });
+
+            // Initialize Renderers
+            renderTeam();
+            renderWriteups(writeups);
+            renderCtfs();
+            initInteractions();
+            initEasterEgg();
+        });
+
+        // --- RENDER TEAM MEMBERS ---
+        function renderTeam() {
+            const grid = document.getElementById('team-grid');
+            grid.innerHTML = teamMembers.map(m => `
+                <div class="tech-card p-6 rounded flex flex-col justify-between group">
+                    <div>
+                        <div class="flex items-center justify-between mb-4">
+                            <div class="w-12 h-12 rounded border border-darkred bg-deepblack flex items-center justify-center font-mono font-bold text-brightred text-lg shadow-inner group-hover:bg-brightred group-hover:text-deepblack transition-colors">
+                                ${m.alias.substring(1, 3).toUpperCase()}
+                            </div>
+                            <div class="font-mono text-[10px] text-mutedgray uppercase tracking-widest px-2 py-1 bg-deepblack border border-bordergray rounded">
+                                ${m.role.split('/')[0]}
+                            </div>
+                        </div>
+                        <div class="font-display font-bold text-xl text-offwhite group-hover:text-brightred transition-colors mb-1">
+                            ${m.alias}
+                        </div>
+                        <div class="font-mono text-xs text-mutedgray mb-4">
+                            ${m.realName} // ${m.secondary}
+                        </div>
+                        <div class="flex flex-wrap gap-1.5 mb-6">
+                            ${m.tags.map(t => `<span class="px-2 py-0.5 bg-deepblack border border-bordergray rounded font-mono text-[10px] text-mutedgray">${t}</span>`).join('')}
+                        </div>
+                    </div>
+                    <div class="flex items-center space-x-3 pt-4 border-t border-bordergray text-mutedgray text-xs font-mono">
+                        <a href="${m.github}" target="_blank" class="hover:text-brightred transition-colors"><i class="fa-brands fa-github"></i> GitHub</a>
+                        <a href="${m.x}" target="_blank" class="hover:text-brightred transition-colors"><i class="fa-brands fa-x-twitter"></i> X</a>
+                        <a href="${m.ctftime}" target="_blank" class="hover:text-brightred transition-colors"><i class="fa-solid fa-flag"></i> Profile</a>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // --- RENDER WRITEUPS ---
+        function renderWriteups(items) {
+            const grid = document.getElementById('writeups-grid');
+            if(items.length === 0) {
+                grid.innerHTML = `<div class="col-span-full py-12 text-center font-mono text-mutedgray text-sm">No writeups found matching query.</div>`;
+                return;
+            }
+
+            grid.innerHTML = items.map(w => `
+                <div class="tech-card p-6 rounded flex flex-col justify-between cursor-pointer group" onclick="openWriteupModal('${w.id}')">
+                    <div>
+                        <div class="flex items-center justify-between mb-3 font-mono text-xs">
+                            <span class="text-brightred font-bold">${w.ctfName}</span>
+                            <span class="px-2 py-0.5 bg-deepblack border border-bordergray text-mutedgray rounded text-[10px]">${w.category}</span>
+                        </div>
+                        <h3 class="font-display font-bold text-lg text-offwhite group-hover:text-brightred transition-colors mb-2">
+                            ${w.challengeName}
+                        </h3>
+                        <p class="text-mutedgray text-xs font-sans line-clamp-2 mb-4">
+                            ${w.tldr}
+                        </p>
+                        <div class="flex flex-wrap gap-1 mb-4">
+                            ${w.tags.map(t => `<span class="px-2 py-0.5 bg-deepblack border border-bordergray rounded font-mono text-[10px] text-mutedgray">#${t}</span>`).join('')}
+                        </div>
+                    </div>
+                    <div class="flex items-center justify-between pt-4 border-t border-bordergray font-mono text-[11px] text-mutedgray">
+                        <span>By ${w.author}</span>
+                        <span class="text-offwhite font-bold group-hover:text-brightred transition-colors">READ WRITEUP &rarr;</span>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // --- RENDER CTF TIMELINE ---
+        function renderCtfs() {
+            const container = document.getElementById('ctf-timeline');
+            container.innerHTML = ctfHistory.map(group => `
+                <div class="mb-10">
+                    <div class="font-mono text-xs text-brightred tracking-widest uppercase mb-4 pb-2 border-b border-bordergray">
+                        // YEAR ${group.year}
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        ${group.ctfs.map(c => `
+                            <div class="tech-card p-5 rounded flex items-center justify-between">
+                                <div>
+                                    <div class="font-display font-bold text-lg text-offwhite mb-1">${c.name}</div>
+                                    <div class="font-mono text-xs text-mutedgray">Solved: ${c.solved} &bull; Date: ${c.date}</div>
+                                </div>
+                                <div class="text-right font-mono">
+                                    <div class="text-brightred font-bold text-lg">Rank ${c.rank}</div>
+                                    <div class="text-xs text-mutedgray">${c.points} pts</div>
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // --- INTERACTIVE WRITEUP MODAL ---
+        function openWriteupModal(id) {
+            const w = writeups.find(item => item.id === id);
+            if(!w) return;
+
+            const modalContent = document.getElementById('modal-content');
+            modalContent.innerHTML = `
+                <div class="font-mono text-xs text-brightred mb-2">// ${w.ctfName} // ${w.category} // ${w.difficulty}</div>
+                <h1 class="font-display font-extrabold text-2xl sm:text-4xl text-offwhite mb-4">${w.challengeName}</h1>
+                
+                <div class="flex flex-wrap items-center gap-4 text-xs font-mono text-mutedgray pb-6 mb-6 border-b border-bordergray">
+                    <span><i class="fa-solid fa-user text-brightred mr-1"></i> Author: ${w.author}</span>
+                    <span><i class="fa-solid fa-calendar text-brightred mr-1"></i> Date: ${w.date}</span>
+                    <span><i class="fa-solid fa-signal text-brightred mr-1"></i> Difficulty: ${w.difficulty}</span>
+                </div>
+
+                <div class="space-y-6 text-sm text-offwhite font-sans leading-relaxed">
+                    <div>
+                        <h3 class="font-mono font-bold text-brightred uppercase text-xs tracking-wider mb-2">// 01. TL;DR</h3>
+                        <p class="text-mutedgray bg-deepblack p-4 rounded border border-bordergray font-mono text-xs">${w.tldr}</p>
+                    </div>
+
+                    <div>
+                        <h3 class="font-mono font-bold text-brightred uppercase text-xs tracking-wider mb-2">// 02. CHALLENGE DESCRIPTION & RECON</h3>
+                        <p>${w.description}</p>
+                        <p class="mt-2">${w.recon}</p>
+                    </div>
+
+                    <div>
+                        <h3 class="font-mono font-bold text-brightred uppercase text-xs tracking-wider mb-2">// 03. TECHNICAL ANALYSIS & EXPLOIT</h3>
+                        <p>${w.analysis}</p>
+                        <p class="mt-2">${w.exploitation}</p>
+                    </div>
+
+                    <div>
+                        <h3 class="font-mono font-bold text-brightred uppercase text-xs tracking-wider mb-2">// 04. PAYLOAD / EXPLOIT SCRIPT</h3>
+                        <div class="bg-[#030303] border border-bordergray rounded p-4 font-mono text-xs text-brightred overflow-x-auto">
+                            <pre><code>${w.payload}</code></pre>
+                        </div>
+                    </div>
+
+                    <div>
+                        <h3 class="font-mono font-bold text-brightred uppercase text-xs tracking-wider mb-2">// 05. SOLUTION & FLAG</h3>
+                        <p class="mb-4">${w.solution}</p>
+                        <div class="inline-block bg-deepblack border border-darkred px-4 py-3 rounded font-mono text-sm text-offwhite">
+                            <span class="text-brightred font-bold">FLAG:</span> <span class="select-all">${w.flag}</span>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            document.getElementById('writeup-modal').classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+        }
+
+        document.getElementById('close-modal').addEventListener('click', () => {
+            document.getElementById('writeup-modal').classList.add('hidden');
+            document.body.style.overflow = 'auto';
+        });
+
+        // Close modal on background click
+        document.getElementById('writeup-modal').addEventListener('click', (e) => {
+            if(e.target.id === 'writeup-modal') {
+                document.getElementById('writeup-modal').classList.add('hidden');
+                document.body.style.overflow = 'auto';
+            }
+        });
+
+        // --- SEARCH & FILTER LOGIC ---
+        const searchInput = document.getElementById('writeup-search');
+        const sortSelect = document.getElementById('writeup-sort');
+        const catButtons = document.querySelectorAll('.cat-btn');
+        let currentCategory = 'ALL';
+
+        searchInput.addEventListener('input', filterAndSortWriteups);
+        sortSelect.addEventListener('change', filterAndSortWriteups);
+
+        catButtons.forEach(btn => {
+            btn.addEventListener('click', () => {
+                catButtons.forEach(b => {
+                    b.classList.remove('bg-brightred', 'text-deepblack', 'font-bold');
+                    b.classList.add('bg-deepblack', 'text-mutedgray', 'border', 'border-bordergray');
+                });
+                btn.classList.add('bg-brightred', 'text-deepblack', 'font-bold');
+                btn.classList.remove('bg-deepblack', 'text-mutedgray', 'border', 'border-bordergray');
+                currentCategory = btn.getAttribute('data-category');
+                filterAndSortWriteups();
+            });
+        });
+
+        function filterAndSortWriteups() {
+            let query = searchInput.value.toLowerCase();
+            let filtered = writeups.filter(w => {
+                let matchesCategory = currentCategory === 'ALL' || w.category === currentCategory;
+                let matchesQuery = w.challengeName.toLowerCase().includes(query) ||
+                                   w.ctfName.toLowerCase().includes(query) ||
+                                   w.tags.some(t => t.toLowerCase().includes(query)) ||
+                                   w.tldr.toLowerCase().includes(query);
+                return matchesCategory && matchesQuery;
+            });
+
+            let sortVal = sortSelect.value;
+            if(sortVal === 'latest') {
+                filtered.reverse();
+            } else if(sortVal === 'difficulty') {
+                const diffOrder = { 'Easy': 1, 'Medium': 2, 'Hard': 3, 'Insane': 4 };
+                filtered.sort((a, b) => (diffOrder[b.difficulty] || 0) - (diffOrder[a.difficulty] || 0));
+            }
+
+            renderWriteups(filtered);
+        }
+
+        // --- UI INTERACTIONS & CURSOR ---
+        function initInteractions() {
+            const cursor = document.getElementById('custom-cursor');
+            const ring = document.getElementById('custom-cursor-ring');
+
+            let mouseX = 0, mouseY = 0;
+            let ringX = 0, ringY = 0;
+
+            window.addEventListener('mousemove', (e) => {
+                mouseX = e.clientX;
+                mouseY = e.clientY;
+                cursor.style.transform = `translate(${mouseX}px, ${mouseY}px)`;
+            });
+
+            function renderCursor() {
+                ringX += (mouseX - ringX) * 0.15;
+                ringY += (mouseY - ringY) * 0.15;
+                ring.style.transform = `translate(${ringX}px, ${ringY}px)`;
+                requestAnimationFrame(renderCursor);
+            }
+            requestAnimationFrame(renderCursor);
+
+            // Hover effects on interactive items
+            const interactables = document.querySelectorAll('a, button, input, select, .tech-card');
+            interactables.forEach(el => {
+                el.addEventListener('mouseenter', () => document.body.classList.add('hovering'));
+                el.addEventListener('mouseleave', () => document.body.classList.remove('hovering'));
+            });
+
+            // Mobile menu toggle
+            const mobileMenuBtn = document.getElementById('mobile-menu-btn');
+            const mobileMenu = document.getElementById('mobile-menu');
+            mobileMenuBtn.addEventListener('click', () => {
+                mobileMenu.classList.toggle('hidden');
+            });
+
+            const mobileLinks = document.querySelectorAll('.mobile-link');
+            mobileLinks.forEach(link => {
+                link.addEventListener('click', () => mobileMenu.classList.add('hidden'));
+            });
+        }
+
+        // --- EASTER EGG & LOGO INTERACTION ---
+        let logoClickCount = 0;
+        document.getElementById('logo-container').addEventListener('click', () => {
+            logoClickCount++;
+            if(logoClickCount === 3) {
+                triggerEasterEgg("EASTER EGG UNLOCKED: ROOT PRIVILEGES GRANTED TO 3L B4SHWAT!");
+                logoClickCount = 0;
+            } else {
+                // Subtle glitch effect
+                const logo = document.getElementById('logo-container');
+                logo.style.transform = 'translate(-3px, 3px) skew(5deg)';
+                setTimeout(() => logo.style.transform = 'none', 200);
+            }
+        });
+
+        // Konami code easter egg
+        let konamiCode = ['ArrowUp','ArrowUp','ArrowDown','ArrowDown','ArrowLeft','ArrowRight','ArrowLeft','ArrowRight','b','a'];
+        let konamiIndex = 0;
+        document.addEventListener('keydown', (e) => {
+            if(e.key === konamiCode[konamiIndex]) {
+                konamiIndex++;
+                if(konamiIndex === konamiCode.length) {
+                    triggerEasterEgg("KONAMI CODE SEQUENCE VERIFIED: ALL FLAGS REVEALED.");
+                    konamiIndex = 0;
+                }
+            } else {
+                konamiIndex = 0;
+            }
+
+            // Type 'sudo 3lb4shwat'
+            if(e.key === '4' || e.key === 'Escape') {
+                // Quick 404 test shortcut or easter egg
+            }
+        });
+
+        function triggerEasterEgg(msg) {
+            const banner = document.createElement('div');
+            banner.className = 'fixed top-24 left-1/2 transform -translate-x-1/2 z-[200] bg-brightred text-deepblack font-mono font-bold px-6 py-3 rounded shadow-2xl border border-offwhite animate-bounce text-xs sm:text-sm';
+            banner.innerHTML = `<i class="fa-solid fa-triangle-exclamation mr-2"></i> ${msg}`;
+            document.body.appendChild(banner);
+            setTimeout(() => banner.remove(), 4000);
+        }
+
+        function close404() {
+            document.getElementById('view-404').classList.add('hidden');
+            document.body.style.overflow = 'auto';
+        }
+    </script>
+</body>
+</html>
